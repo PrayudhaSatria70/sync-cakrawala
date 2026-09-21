@@ -12,7 +12,7 @@
     "dev:api": "npm run dev -w @sync/api",
     "dev:web": "npm run dev -w @sync/web",
     "build": "npm run build -w @sync/shared && npm run build -w @sync/api && npm run build -w @sync/web",
-    "build:api": "npm run build -w @sync/shared && npm run build -w @sync/api",
+    "build:api": "npm run db:generate && npm run build -w @sync/shared && npm run build -w @sync/api",
     "build:web": "npm run build -w @sync/shared && npm run build -w @sync/web",
     "start": "npm run start:api",
     "start:api": "npm run start -w @sync/api",
