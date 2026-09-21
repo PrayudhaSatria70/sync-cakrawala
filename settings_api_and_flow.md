@@ -1,7 +1,7 @@
 # SYNC Cakrawala: Settings, API, and Flow Architecture
 
 **Product**: SYNC Cakrawala (Revision 3.2 Master Plan Baseline)  
-**System Architecture**: Monorepo with Next.js App Router (Frontend) + NestJS (Backend) + Prisma ORM + SQLite + Object Storage (Local/S3 compatible)
+**System Architecture**: Monorepo with Next.js App Router (Frontend on Vercel) + NestJS (Backend on Railway) + Prisma ORM + PostgreSQL (Railway) + Object Storage (Local/S3 compatible)
 
 ---
 
@@ -11,10 +11,12 @@
 
 | Variable | Scope | Default | Description |
 |---|---|---|---|
-| `PORT` | Backend | `4000` | Port for NestJS REST API server |
-| `DATABASE_URL` | Backend | `file:./dev.db` | SQLite database file location |
+| `PORT` | Backend | `4000` | Port for NestJS REST API server (dynamic `$PORT` on Railway) |
+| `DATABASE_URL` | Backend | `postgresql://...` | PostgreSQL database connection string (`${{Postgres.DATABASE_URL}}` on Railway) |
 | `SESSION_SECRET` | Backend | `change-me-in-production` | Secret key used for signing session cookies |
-| `WEB_ORIGIN` | Backend | `http://localhost:3000` | Allowed CORS origin for frontend client requests |
+| `WEB_ORIGIN` | Backend | `http://localhost:3000` | Allowed CORS origin (comma-separated or wildcard for Vercel domains) |
+| `COOKIE_SAME_SITE` | Backend | `lax` (dev) / `none` (prod)| Cookie SameSite attribute (`none` required for cross-site Vercel to Railway) |
+| `COOKIE_SECURE` | Backend | `false` (dev) / `true` (prod)| Require HTTPS for session cookies |
 | `STORAGE_DRIVER` | Backend | `local` | Storage driver (`local` or `s3`) |
 | `STORAGE_LOCAL_PATH` | Backend | `./storage` | Directory path for local binary storage |
 | `GOOGLE_OIDC_ENABLED`| Backend | `false` | Enable/disable Google Workspace OIDC |
@@ -22,7 +24,7 @@
 | `GOOGLE_CLIENT_SECRET`| Backend | `""` | Google Cloud OAuth2 Client Secret |
 | `GOOGLE_REDIRECT_URI`| Backend | `http://localhost:4000/auth/google/callback` | OAuth2 callback redirect URL |
 | `ALLOWED_EMAIL_DOMAIN`| Backend | `cakrawala.ac.id` | Hosted domain claim validator for OIDC & local emails |
-| `NEXT_PUBLIC_API_URL`| Frontend | `http://localhost:4000` | Public backend API URL consumed by client |
+| `NEXT_PUBLIC_API_URL`| Frontend | `http://localhost:4000` | Public backend API URL consumed by Vercel client |
 
 ### 1.2 System Settings Model (`SystemSettings`)
 
@@ -257,9 +259,9 @@ All endpoints are hosted at `http://localhost:4000` (or `PORT`).
   └── ConflictsService: Side-by-side reconciliation & resolution notes
               │
               ▼
-[ Persistence Layer: Prisma ORM + SQLite ]
-  ├── dev.db (Users, Roles, Permissions, Divisions, Tasks, Documents, Approvals, Conflicts)
-  └── storage/ (Local binary files stored by hash/UUID)
+[ Persistence Layer: Prisma ORM + PostgreSQL on Railway ]
+  ├── PostgreSQL Service (Users, Roles, Permissions, Divisions, Tasks, Documents, Approvals, Conflicts)
+  └── storage/ (Local binary files stored by hash/UUID or S3 driver)
               │
               ▼
 [ Audit Trail Service ]
@@ -282,7 +284,8 @@ All endpoints are hosted at `http://localhost:4000` (or `PORT`).
 
 1. **Authentication Security**:
    - Passwords hashed using `bcrypt` (12 rounds).
-   - Session cookies configured `httpOnly: true`, `sameSite: 'lax'`, `maxAge: 8 hours`.
+   - Session cookies configured `httpOnly: true`, `sameSite: 'none'` (in production cross-origin mode) / `'lax'` (in local dev), `secure: true` (in production HTTPS), `maxAge: 8 hours`.
+   - Express reverse proxy support: `trust proxy: 1` enabled for Railway TLS termination.
    - Rate limiting via `@nestjs/throttler` (10 login attempts/min).
 2. **Authorization & Least Privilege**:
    - Division scope enforced on all data queries (`divisionId: user.divisionId` for scoped roles).
@@ -296,37 +299,41 @@ All endpoints are hosted at `http://localhost:4000` (or `PORT`).
 
 ---
 
-## 6. Deployment & Cloud Hosting (Railway / Railpack)
+## 6. Deployment & Cloud Hosting (Vercel Frontend + Railway API & PostgreSQL)
 
-### 6.1 Architecture Overview
-The repository is an npm workspaces monorepo containing:
-- `@sync/api`: NestJS Backend API (default port `4000`, binds `0.0.0.0`)
-- `@sync/web`: Next.js Web App Router (default port `3000`, binds dynamic `$PORT`)
-- `@sync/shared`: Shared TypeScript contracts and utilities
+### 6.1 Production Architecture
 
-### 6.2 Railway Deployment Options
+```
+[ Vercel: Next.js 15 Web App ]
+         │ (Cross-Origin HTTPS, credentials: 'include')
+         ▼
+[ Railway: NestJS 11 REST API ] (via railway.json Nixpacks)
+         │ (Prisma Client over TCP/SSL)
+         ▼
+[ Railway: Managed PostgreSQL Database ]
+```
 
-#### Option A: Separate Services (Recommended for Production)
-In your Railway project, deploy two services from the same Git repository:
+### 6.2 Service Configuration Matrix
 
-1. **API Service (`sync-api`)**:
-   - **Build Command**: `npm run build:api` (or `npm run build -w @sync/shared && npm run build -w @sync/api`)
-   - **Start Command**: `npm run start:api`
-   - **Variables**:
-     - `PORT` (assigned automatically by Railway)
-     - `DATABASE_URL="file:./dev.db"`
-     - `SESSION_SECRET="production-random-secret"`
-     - `WEB_ORIGIN="https://<your-web-service>.up.railway.app"`
+#### Service 1: Railway Managed PostgreSQL
+- Provisioned via Railway canvas (**`+ New`** → **`Database`** → **`PostgreSQL`**).
+- Connection string available internally via `${{Postgres.DATABASE_URL}}`.
 
-2. **Web Service (`sync-web`)**:
-   - **Build Command**: `npm run build:web` (or `npm run build -w @sync/shared && npm run build -w @sync/web`)
-   - **Start Command**: `npm run start:web`
-   - **Variables**:
-     - `PORT` (assigned automatically by Railway)
-     - `NEXT_PUBLIC_API_URL="https://<your-api-service>.up.railway.app"`
+#### Service 2: Railway NestJS API Service (`sync-api`)
+- **Nixpacks Configuration** (`railway.json`):
+  - `build.buildCommand`: `npx prisma generate --schema=apps/api/prisma/schema.prisma && npm run build -w @sync/shared && npm run build -w @sync/api`
+  - `deploy.startCommand`: `npm run start:migrate -w @sync/api`
+- **Environment Variables**:
+  - `DATABASE_URL`: `${{Postgres.DATABASE_URL}}`
+  - `PORT`: (Auto-assigned by Railway)
+  - `WEB_ORIGIN`: `https://<your-vercel-app>.vercel.app` (supports comma-separated list or `*.vercel.app`)
+  - `SESSION_SECRET`: Random 32+ character string
+  - `COOKIE_SAME_SITE`: `none` (auto-detected in production)
+  - `COOKIE_SECURE`: `true` (auto-detected in production)
 
-#### Option B: Single Service (Default Railpack Detection)
-If deployed as a single root service on Railway, Railpack automatically detects the root scripts:
-- **Build Command**: `npm run build`
-- **Start Command**: `npm start` (defaults to `npm run start:api`)
-- Package manager is explicitly pinned via `"packageManager": "npm@11.19.0"`.
+#### Service 3: Vercel Web Application (`sync-web`)
+- **Framework Preset**: `Next.js`
+- **Root Directory**: `apps/web`
+- **Build Command**: `npm run build` (transpiles `@sync/shared` automatically via `next.config.js`)
+- **Environment Variables**:
+  - `NEXT_PUBLIC_API_URL`: `https://<your-railway-api>.up.railway.app` (Railway public domain, no trailing slash)

@@ -29,41 +29,44 @@ SYNC Cakrawala directly addresses and eliminates the **three case study failure 
 ```
                              [ User Browser ]
                                     │
-                                    ▼ HTTP (Port 3000)
-                     ┌──────────────────────────────┐
-                     │     Next.js / React 19       │
-                     │  Tailwind CSS Design System  │
-                     │   App Router (/dashboard,    │
-                     │    /tasks, /approvals, etc.) │
-                     └──────────────┬───────────────┘
-                                    │
-                                    ▼ REST / JSON (Credentials: Include)
-                     ┌──────────────────────────────┐
-                     │       NestJS 11 REST API     │
-                     │         (Port 4000)          │
-                     ├──────────────────────────────┤
-                     │ Guards: Auth, RBAC, Division │
-                     │ Interceptors: Request ID     │
-                     │ Filters: Safe HttpException  │
-                     └──────────────┬───────────────┘
-                                    │
-                    ┌───────────────┴───────────────┐
-                    ▼                               ▼
-       ┌────────────────────────┐      ┌────────────────────────┐
-       │   Prisma ORM + SQLite  │      │  Binary Object Storage │
-       │ (Users, Roles, Tasks,  │      │ (Local Disk / S3 Blob) │
-       │  Docs, Approvals, etc) │      │ (Safe UUID Keyed MIME) │
-       └────────────────────────┘      └────────────────────────┘
+                                    ▼ HTTPS
+                      ┌──────────────────────────────┐
+                      │      Frontend (Vercel)       │
+                      │     Next.js 15 / React 19    │
+                      │  Tailwind CSS Design System  │
+                      │   App Router (/dashboard,    │
+                      │    /tasks, /approvals, etc.) │
+                      └──────────────┬───────────────┘
+                                     │
+                                     ▼ REST / JSON (Credentials: Include)
+                      ┌──────────────────────────────┐
+                      │    Backend Service (Railway) │
+                      │       NestJS 11 REST API     │
+                      │       (Port dynamic/$PORT)   │
+                      ├──────────────────────────────┤
+                      │ Guards: Auth, RBAC, Division │
+                      │ Interceptors: Request ID     │
+                      │ Filters: Safe HttpException  │
+                      └──────────────┬───────────────┘
+                                     │
+                     ┌───────────────┴───────────────┐
+                     ▼                               ▼
+        ┌────────────────────────┐      ┌────────────────────────┐
+        │  Railway PostgreSQL DB │      │  Binary Object Storage │
+        │  Prisma ORM (Postgres) │      │ (Local Disk / S3 Blob) │
+        │ (Users, Roles, Tasks,  │      │ (Safe UUID Keyed MIME) │
+        │  Docs, Approvals, etc) │      │                        │
+        └────────────────────────┘      └────────────────────────┘
 ```
 
 ---
 
 ## 3. Technology Stack
 
-- **Frontend**: Next.js 15 (App Router), React 19, Tailwind CSS.
-- **Backend**: NestJS 11, Express, Class-Validator, Class-Transformer.
-- **Data & ORM**: Prisma ORM 6, SQLite (`dev.db`).
-- **Identity & Session**: Google Workspace OIDC + Scoped Local Authentication (`express-session` with HTTP-only cookies and bcrypt password hashing).
+- **Frontend**: Next.js 15 (App Router), React 19, Tailwind CSS (Hosted on **Vercel**).
+- **Backend**: NestJS 11, Express, Class-Validator, Class-Transformer (Hosted on **Railway**).
+- **Data & ORM**: Prisma ORM 6, **PostgreSQL** (Hosted on **Railway**).
+- **Identity & Session**: Scoped Local Authentication + Google Workspace OIDC (`express-session` with HTTP-only cookies, `SameSite=None; Secure` for cross-origin Vercel/Railway production, and bcrypt password hashing).
 - **Design Tokens**: Cakrawala Navy (`#16324F`), Cakrawala Teal (`#087EA4`), Light Cyan (`#DDF3F8`), Success (`#18A874`), Warning (`#F4A62A`), Danger (`#EF6A6A`), Surface (`#F3F8FC`), Border (`#DCE7EF`).
 
 ---
@@ -73,6 +76,7 @@ SYNC Cakrawala directly addresses and eliminates the **three case study failure 
 ### Prerequisites
 - Node.js >= 20
 - npm >= 10
+- PostgreSQL >= 14 (or local Docker container / remote Railway PostgreSQL instance)
 
 ### Installation Steps
 
@@ -90,11 +94,12 @@ SYNC Cakrawala directly addresses and eliminates the **three case study failure 
 3. **Configure environment files**:
    ```bash
    cp .env.example apps/api/.env
-   cp apps/web/.env.local.example apps/web/.env.local  # or use defaults
+   cp .env.example apps/web/.env.local  # or set NEXT_PUBLIC_API_URL
    ```
 
 4. **Run database migration & seed demo dataset**:
    ```bash
+   npm run db:generate
    npm run db:migrate
    npm run db:seed
    ```
@@ -110,13 +115,15 @@ SYNC Cakrawala directly addresses and eliminates the **three case study failure 
 
 ## 5. Environment Variables Reference
 
-### Backend (`apps/api/.env`)
-| Variable | Default | Purpose |
+### Backend (`apps/api/.env` / Railway Service Variables)
+| Variable | Default / Example | Purpose |
 |---|---|---|
-| `PORT` | `4000` | NestJS HTTP Port |
-| `DATABASE_URL` | `"file:./dev.db"` | SQLite database file connection string |
-| `SESSION_SECRET` | `"change-me-in-production"` | Cookie signing secret |
-| `WEB_ORIGIN` | `"http://localhost:3000"` | Allowed CORS origin |
+| `PORT` | `4000` (dynamic on Railway) | NestJS HTTP Port |
+| `DATABASE_URL` | `postgresql://user:pass@host:5432/db` | PostgreSQL connection string (or `${{Postgres.DATABASE_URL}}` on Railway) |
+| `SESSION_SECRET` | `"change-me-in-production"` | Cookie signing secret (use 64-char random hex in prod) |
+| `WEB_ORIGIN` | `"http://localhost:3000"` | Allowed CORS origins (comma-separated, e.g. `https://sync-cakrawala.vercel.app`) |
+| `COOKIE_SAME_SITE` | `"lax"` (dev) / `"none"` (prod) | Cookie SameSite policy (`none` for cross-site Vercel to Railway) |
+| `COOKIE_SECURE` | `"false"` (dev) / `"true"` (prod) | Require HTTPS for session cookies |
 | `STORAGE_DRIVER` | `"local"` | Binary driver: `local` or `s3` |
 | `STORAGE_LOCAL_PATH`| `"./storage"` | Local uploaded files directory |
 | `GOOGLE_OIDC_ENABLED`| `"false"` | Toggles Google Workspace OIDC |
@@ -124,10 +131,10 @@ SYNC Cakrawala directly addresses and eliminates the **three case study failure 
 | `GOOGLE_CLIENT_SECRET`| `""` | Google Cloud OAuth2 Client Secret |
 | `ALLOWED_EMAIL_DOMAIN`| `"cakrawala.ac.id"` | Required institutional email domain |
 
-### Frontend (`apps/web/.env.local`)
-| Variable | Default | Purpose |
+### Frontend (`apps/web/.env.local` / Vercel Environment Variables)
+| Variable | Default / Example | Purpose |
 |---|---|---|
-| `NEXT_PUBLIC_API_URL` | `"http://localhost:4000"` | Target NestJS API URL |
+| `NEXT_PUBLIC_API_URL` | `"http://localhost:4000"` (dev) / `https://sync-api.up.railway.app` (prod) | Target NestJS API URL (inlined at build time) |
 
 ---
 
@@ -213,23 +220,93 @@ Accessible only to accounts with `admin:*` permissions:
 
 ---
 
-## 10. Railway Cloud Deployment Plan
+## 10. Production Deployment: Vercel (Frontend) + Railway (API & PostgreSQL)
 
-### Project Setup
-1. Create a new Railway project with two services:
-   - **`sync-api`**: Root directory `apps/api`, Build command `npm run build`, Start command `npm run start:prod`.
-   - **`sync-web`**: Root directory `apps/web`, Build command `npm run build`, Start command `npm run start`.
-2. Attach a persistent volume to `sync-api` at `/app/apps/api/prisma` (for SQLite `dev.db`) and `/app/apps/api/storage` (for uploaded documents).
-3. Set environment variables in Railway dashboard according to Section 5.
-4. Set `WEB_ORIGIN` in `sync-api` to the deployed `sync-web` domain (e.g. `https://sync-web.up.railway.app`).
-5. Set `NEXT_PUBLIC_API_URL` in `sync-web` to the deployed `sync-api` domain.
+The production architecture separates the presentation layer from the persistent business service and relational storage:
+
+```
+┌───────────────────────────────────────────────────────────┐
+│ Vercel (Frontend UI)                                      │
+│ • Next.js 15 (App Router, Server Components & Client UI) │
+│ • Environment: NEXT_PUBLIC_API_URL                        │
+│ • URL: https://<project>.vercel.app                       │
+└─────────────────────────────┬─────────────────────────────┘
+                              │
+                              │ Cross-Origin HTTPS (credentials: include)
+                              │ Cookie: SameSite=None; Secure; Partitioned
+                              ▼
+┌───────────────────────────────────────────────────────────┐
+│ Railway (API Service)                                     │
+│ • NestJS 11 REST API via Nixpacks (railway.json)          │
+│ • Environment: DATABASE_URL, WEB_ORIGIN, SESSION_SECRET   │
+│ • URL: https://<service>.up.railway.app                   │
+└─────────────────────────────┬─────────────────────────────┘
+                              │
+                              │ Managed TCP Connection (Port 5432)
+                              ▼
+┌───────────────────────────────────────────────────────────┐
+│ Railway (Managed PostgreSQL)                              │
+│ • Prisma ORM with automated migrations on boot            │
+│ • Persistent relational storage across deploys            │
+└───────────────────────────────────────────────────────────┘
+```
+
+### Step-by-Step Connection Guide
+
+#### Phase 1 — Database Setup on Railway (PostgreSQL)
+1. Open your project on [Railway](https://railway.app).
+2. Click **`+ New`** → Select **`Database`** → **`Add PostgreSQL`**.
+3. Railway provisions a high-availability PostgreSQL cluster and automatically populates `DATABASE_URL`.
+
+#### Phase 2 — API Service Setup on Railway (`sync-api`)
+1. In the same Railway project canvas, click **`+ New`** → **`GitHub Repo`** → Select `sync-cakrawala`.
+2. Configure **Settings**:
+   - **Root Directory**: leave as `/` (monorepo root).
+   - **Build Command**: auto-configured via [`railway.json`](file:///c:/Users/muhas/Desktop/WORK%20Projects/sync-cakrawala/railway.json):
+     ```bash
+     npx prisma generate --schema=apps/api/prisma/schema.prisma && npm run build -w @sync/shared && npm run build -w @sync/api
+     ```
+   - **Start Command**: auto-configured via [`railway.json`](file:///c:/Users/muhas/Desktop/WORK%20Projects/sync-cakrawala/railway.json):
+     ```bash
+     npm run start:migrate -w @sync/api
+     ```
+     *(Runs `prisma migrate deploy` before launching NestJS on `$PORT`)*.
+3. Configure **Variables** in Railway API Service:
+   - `DATABASE_URL`: Set to `${{Postgres.DATABASE_URL}}` (or copy PostgreSQL connection string).
+   - `WEB_ORIGIN`: Set to your Vercel frontend URL, e.g. `https://sync-cakrawala.vercel.app` (multiple comma-separated URLs or wildcard `*.vercel.app` are supported).
+   - `SESSION_SECRET`: Set to a strong secret string (e.g. `openssl rand -hex 32`).
+   - `COOKIE_SAME_SITE`: Set to `none` (auto-detected in production).
+   - `COOKIE_SECURE`: Set to `true` (auto-detected in production).
+4. Under **Networking**, click **`Generate Domain`** to get your public API URL (e.g. `https://sync-api-production.up.railway.app`).
+
+#### Phase 3 — Frontend Setup on Vercel (`sync-web`)
+1. Open [Vercel](https://vercel.com) → Click **`Add New...`** → **`Project`**.
+2. Import your `sync-cakrawala` GitHub repository.
+3. Configure Project Settings:
+   - **Framework Preset**: `Next.js`
+   - **Root Directory**: Click **Edit** and choose `apps/web`.
+   - **Build Command**: `npm run build` (Next.js automatically transpiles `@sync/shared` via `next.config.js`).
+4. Configure **Environment Variables** on Vercel:
+   - Key: `NEXT_PUBLIC_API_URL`
+   - Value: `https://sync-api-production.up.railway.app` *(use your Railway domain without trailing slash)*
+   - Environments: check **Production**, **Preview**, and **Development**.
+5. Click **Deploy**.
+
+#### Phase 4 — Verifying Cross-Origin Communication
+1. Open your deployed Vercel URL (`https://<project>.vercel.app`).
+2. Open Browser DevTools → **Network** tab.
+3. Sign in with evaluator credentials (`admin@cakrawala.ac.id` / `Demo123!`).
+4. Verify:
+   - `POST /auth/login` returns HTTP 200 with response header `set-cookie: sync.sid=...; SameSite=None; Secure; HttpOnly`.
+   - Subsequent request `GET /users/me` automatically includes the `Cookie: sync.sid=...` header.
+   - User is redirected to `/dashboard` seamlessly.
 
 ---
 
-## 11. Known Limitations
+## 11. Known Limitations & Production Notes
 
-- **Single-Node SQLite Persistence**: Optimized for assignment evaluation and zero-ops deployment. For horizontal scaling across multiple Railway replicas, replace SQLite with PostgreSQL via Prisma provider switch.
-- **Local Storage Driver**: Binaries are stored on local persistent disk. For production deployments with multiple API replicas, set `STORAGE_DRIVER="s3"` and supply AWS S3 / Cloudflare R2 credentials.
+- **Object Storage Driver**: Uploaded files default to `STORAGE_DRIVER="local"`. In a stateless container environment, configure `STORAGE_DRIVER="s3"` with AWS S3 or Cloudflare R2 bucket credentials for durable asset storage across restarts.
+- **Third-Party Cookies vs Custom Domains**: While `SameSite=None; Secure` is fully supported across modern browsers, setting up custom subdomains on a shared apex (e.g. `app.cakrawala.ac.id` on Vercel and `api.cakrawala.ac.id` on Railway) makes session cookies **first-party**, avoiding any aggressive browser tracking prevention blockers.
 
 ---
 
@@ -238,14 +315,16 @@ Accessible only to accounts with `admin:*` permissions:
 Run the full verification suite locally:
 
 ```bash
-# 1. Typecheck & Build API
-npm run build -w @sync/api
+# 1. Monorepo Full Build
+cmd /c "npm run build -w @sync/shared && npm run build -w @sync/api && npm run build -w @sync/web"
 
-# 2. Typecheck & Build Web
-npm run build -w @sync/web
+# 2. Database Migration & Seeding
+npm run db:generate
+npm run db:migrate
+npm run db:seed
 
-# 3. Seed Database
-npm run prisma:seed -w @sync/api
+# 3. Development Mode
+npm run dev
 ```
 
 ---
