@@ -58,8 +58,8 @@ export default function DocumentsPage() {
       {!items.length ? (
         <EmptyState title="No documents" hint="Upload a meeting note to start the golden demo." />
       ) : (
-        <div className="overflow-hidden rounded-xl border border-border bg-white">
-          <table className="w-full text-left text-sm">
+        <div className="overflow-x-auto rounded-xl border border-border bg-white shadow-sm">
+          <table className="w-full min-w-[540px] text-left text-sm">
             <thead className="border-b border-border bg-surface text-xs uppercase text-navy/50">
               <tr>
                 <th className="px-3 py-2">Document</th>

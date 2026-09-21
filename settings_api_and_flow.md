@@ -337,3 +337,37 @@ All endpoints are hosted at `http://localhost:4000` (or `PORT`).
 - **Build Command**: `npm run build` (transpiles `@sync/shared` automatically via `next.config.js`)
 - **Environment Variables**:
   - `NEXT_PUBLIC_API_URL`: `https://<your-railway-api>.up.railway.app` (Railway public domain, no trailing slash)
+
+---
+
+## 7. Mobile UI/UX & Safari ITP Architecture
+
+### 7.1 WebKit ITP & First-Party Proxy Rewrite
+Apple's WebKit **Intelligent Tracking Prevention (ITP)** on iOS Safari blocks third-party cross-site cookies between differing domains (`*.vercel.app` and `*.up.railway.app`) by default. To guarantee 100% reliable session persistence across all iOS and Android mobile browsers without requiring users to disable tracking prevention:
+- **Next.js Rewrites (`apps/web/next.config.js`)**:
+  ```js
+  async rewrites() {
+    return [
+      {
+        source: '/api-proxy/:path*',
+        destination: `${publicApiUrl.replace(/\/+$/, '')}/:path*`,
+      },
+    ];
+  }
+  ```
+- **Client Route Dispatcher (`apps/web/src/lib/api.ts`)**:
+  Browser client requests in deployed environments automatically target `/api-proxy`, converting `sync.sid` into a First-Party cookie tied to the Vercel domain.
+
+### 7.2 Mobile Responsive Design System
+- **AppShell Header & Drawer**:
+  - Mobile header features an accessible 44px SVG hamburger menu button.
+  - User details collapse on mobile viewports into a circular avatar trigger (`Initials`) that opens an interactive popover with account details, Profile, Settings, and Sign out.
+  - Slide-out navigation drawer includes an explicit close (`✕`) button, touch-spaced navigation links, and a dedicated user identity footer.
+- **Form Controls & iOS Safari Auto-Zoom Prevention**:
+  - All form controls (`Input`, `Select`, `Textarea`) use `text-base sm:text-sm` (16px font size on mobile viewports), completely eliminating iOS Safari's disruptive viewport auto-zoom upon focus.
+- **Touch-Friendly Data & Grid Layouts**:
+  - 4-column Kanban board in `Tasks` supports horizontal swipe with momentum and scroll snapping (`snap-x snap-mandatory`).
+  - Side-by-side comparison cards in `Conflicts` automatically stack vertically on small viewports (`grid-cols-1 sm:grid-cols-2`).
+  - Multi-step approval chains in `Approvals` support horizontal touch scrolling (`overflow-x-auto pb-2`).
+  - All tabular records (`Documents`, `Reviews`, `Audit`, `Users`, `Divisions`) are wrapped in `overflow-x-auto` containers with explicit minimum column widths, preventing content truncation on mobile screens.
+

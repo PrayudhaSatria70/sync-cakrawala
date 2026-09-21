@@ -246,8 +246,8 @@ export default function AdminUsersPage() {
         )}
       </div>
 
-      <div className="overflow-hidden rounded-xl border border-border bg-white shadow-sm">
-        <table className="w-full text-left text-sm">
+      <div className="overflow-x-auto rounded-xl border border-border bg-white shadow-sm">
+        <table className="w-full min-w-[700px] text-left text-sm">
           <thead className="border-b border-border bg-surface text-xs uppercase text-navy/60">
             <tr>
               <th className="px-4 py-3">Identity & Email</th>

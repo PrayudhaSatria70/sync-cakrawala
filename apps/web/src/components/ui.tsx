@@ -34,7 +34,7 @@ export function Input({ className, ...props }: InputHTMLAttributes<HTMLInputElem
   return (
     <input
       className={cn(
-        'w-full rounded-lg border border-border bg-white px-3 py-2 text-sm text-navy outline-none focus:border-teal focus:ring-2 focus:ring-cyan',
+        'w-full rounded-lg border border-border bg-white px-3 py-2 text-base sm:text-sm text-navy outline-none focus:border-teal focus:ring-2 focus:ring-cyan',
         className,
       )}
       {...props}
@@ -49,7 +49,7 @@ export function Textarea({
   return (
     <textarea
       className={cn(
-        'w-full rounded-lg border border-border bg-white px-3 py-2 text-sm text-navy outline-none focus:border-teal focus:ring-2 focus:ring-cyan',
+        'w-full rounded-lg border border-border bg-white px-3 py-2 text-base sm:text-sm text-navy outline-none focus:border-teal focus:ring-2 focus:ring-cyan',
         className,
       )}
       {...props}
@@ -65,7 +65,7 @@ export function Select({
   return (
     <select
       className={cn(
-        'w-full rounded-lg border border-border bg-white px-3 py-2 text-sm text-navy outline-none focus:border-teal',
+        'w-full rounded-lg border border-border bg-white px-3 py-2 text-base sm:text-sm text-navy outline-none focus:border-teal',
         className,
       )}
       {...props}
@@ -157,14 +157,21 @@ export function Drawer({
 }) {
   if (!open) return null;
   return (
-    <div className="fixed inset-0 z-50 flex justify-end bg-navy/30">
-      <button className="flex-1" aria-label="Close" onClick={onClose} />
-      <div className="h-full w-full max-w-md overflow-y-auto border-l border-border bg-white p-5 shadow-xl">
-        <div className="mb-4 flex items-center justify-between">
+    <div className="fixed inset-0 z-50 flex justify-end bg-navy/40 backdrop-blur-sm animate-in fade-in duration-200">
+      <button className="flex-1 cursor-default" aria-label="Close" onClick={onClose} />
+      <div className="h-full w-full max-w-md overflow-y-auto border-l border-border bg-white p-4 sm:p-5 shadow-2xl">
+        <div className="mb-4 flex items-center justify-between border-b border-border/60 pb-3">
           <h2 className="font-display text-lg font-bold text-navy">{title}</h2>
-          <Button variant="ghost" onClick={onClose}>
-            Close
-          </Button>
+          <button
+            type="button"
+            onClick={onClose}
+            className="flex h-8 w-8 items-center justify-center rounded-lg text-navy/60 hover:bg-slate-100 hover:text-navy"
+            aria-label="Tutup"
+          >
+            <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
         </div>
         {children}
       </div>

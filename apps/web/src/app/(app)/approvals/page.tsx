@@ -164,10 +164,10 @@ export default function ApprovalsPage() {
                     </div>
                   </div>
 
-                  <div className="text-right">
+                  <div className="text-left sm:text-right">
                     <div className="font-display text-base font-bold text-navy">{budgetFallback}</div>
                     <button
-                      className="mt-2 rounded-lg border border-teal bg-cyan/40 px-3 py-1 text-xs font-semibold text-teal hover:bg-teal hover:text-white transition"
+                      className="mt-2 w-full sm:w-auto rounded-lg border border-teal bg-cyan/40 px-3 py-1.5 text-xs font-semibold text-teal hover:bg-teal hover:text-white transition"
                       onClick={(e) => {
                         e.stopPropagation();
                         openDrawer(item);
@@ -183,12 +183,12 @@ export default function ApprovalsPage() {
                   <div className="text-[11px] font-semibold uppercase tracking-wider text-navy/40 mb-2">
                     Rantai Persetujuan (Approval Chain)
                   </div>
-                  <div className="flex flex-wrap items-center gap-2 sm:gap-4">
+                  <div className="flex items-center gap-2 sm:gap-4 overflow-x-auto pb-2 pt-1">
                     {item.steps.map((st, sIdx) => {
                       const isPassed = st.status === 'APPROVED' || sIdx < item.currentStep;
                       const isCurrent = sIdx === item.currentStep && item.status === 'PENDING';
                       return (
-                        <div key={st.id} className="flex items-center gap-2">
+                        <div key={st.id} className="flex flex-shrink-0 items-center gap-2">
                           <div className="flex items-center gap-1.5">
                             <div
                               className={`flex h-6 w-6 items-center justify-center rounded-full text-xs font-bold ${
@@ -209,7 +209,7 @@ export default function ApprovalsPage() {
                             </div>
                           </div>
                           {sIdx < item.steps.length - 1 && (
-                            <div className="h-0.5 w-6 bg-border" />
+                            <div className="h-0.5 w-5 sm:w-6 bg-border" />
                           )}
                         </div>
                       );

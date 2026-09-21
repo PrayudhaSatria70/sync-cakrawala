@@ -145,37 +145,39 @@ export default function TasksPage() {
       />
 
       {/* Filter and Search Bar Matching Mockup */}
-      <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
-        <div className="flex flex-wrap items-center gap-2">
+      <div className="mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div className="flex flex-col sm:flex-row sm:items-center gap-2 w-full sm:w-auto">
           <Input
             placeholder="Cari tugas…"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-48 text-xs sm:w-64"
+            className="w-full sm:w-56 text-xs"
           />
-          <Select
-            value={divFilter}
-            onChange={(e) => setDivFilter(e.target.value)}
-            className="w-36 text-xs sm:w-44"
-          >
-            <option value="">Semua divisi</option>
-            {divisions.map((d) => (
-              <option key={d.id} value={d.id}>
-                {d.name}
-              </option>
-            ))}
-          </Select>
-          <Select
-            value={prioFilter}
-            onChange={(e) => setPrioFilter(e.target.value)}
-            className="w-32 text-xs sm:w-36"
-          >
-            <option value="">Semua prioritas</option>
-            <option value="LOW">Low</option>
-            <option value="MEDIUM">Medium</option>
-            <option value="HIGH">High</option>
-            <option value="URGENT">Urgent</option>
-          </Select>
+          <div className="flex items-center gap-2">
+            <Select
+              value={divFilter}
+              onChange={(e) => setDivFilter(e.target.value)}
+              className="w-full sm:w-40 text-xs"
+            >
+              <option value="">Semua divisi</option>
+              {divisions.map((d) => (
+                <option key={d.id} value={d.id}>
+                  {d.name}
+                </option>
+              ))}
+            </Select>
+            <Select
+              value={prioFilter}
+              onChange={(e) => setPrioFilter(e.target.value)}
+              className="w-full sm:w-36 text-xs"
+            >
+              <option value="">Semua prioritas</option>
+              <option value="LOW">Low</option>
+              <option value="MEDIUM">Medium</option>
+              <option value="HIGH">High</option>
+              <option value="URGENT">Urgent</option>
+            </Select>
+          </div>
           {(search || divFilter || prioFilter) && (
             <button
               onClick={() => {
@@ -183,7 +185,7 @@ export default function TasksPage() {
                 setDivFilter('');
                 setPrioFilter('');
               }}
-              className="text-xs font-semibold text-teal hover:underline"
+              className="text-xs font-semibold text-teal hover:underline self-start sm:self-auto py-1"
             >
               Reset filter
             </button>
@@ -192,11 +194,11 @@ export default function TasksPage() {
       </div>
 
       {/* 4-Column Kanban Board */}
-      <div className="grid gap-4 overflow-x-auto pb-4 sm:grid-cols-2 xl:grid-cols-4">
+      <div className="flex xl:grid xl:grid-cols-4 gap-4 overflow-x-auto pb-4 snap-x snap-mandatory xl:snap-none">
         {KANBAN_COLS.map((col) => {
           const colTasks = filtered.filter((t) => col.statuses.includes(t.status));
           return (
-            <div key={col.key} className="flex min-w-[260px] flex-col rounded-2xl bg-[#EDF3F8] p-3">
+            <div key={col.key} className="flex min-w-[280px] sm:min-w-[300px] xl:min-w-0 flex-1 flex-col rounded-2xl bg-[#EDF3F8] p-3 snap-start">
               {/* Column Header */}
               <div className="mb-3 flex items-center justify-between px-2">
                 <span className="font-display text-xs font-bold uppercase tracking-wider text-navy/70">

@@ -161,8 +161,8 @@ export default function AdminDivisionsPage() {
       {msg ? <p className="mb-4 rounded-lg bg-green-50 p-3 text-sm font-semibold text-success">{msg}</p> : null}
       {error ? <p className="mb-4 rounded-lg bg-red-50 p-3 text-sm font-semibold text-danger">{error}</p> : null}
 
-      <div className="overflow-hidden rounded-xl border border-border bg-white shadow-sm">
-        <table className="w-full text-left text-sm">
+      <div className="overflow-x-auto rounded-xl border border-border bg-white shadow-sm">
+        <table className="w-full min-w-[700px] text-left text-sm">
           <thead className="border-b border-border bg-surface text-xs uppercase text-navy/60">
             <tr>
               <th className="px-4 py-3">Code</th>

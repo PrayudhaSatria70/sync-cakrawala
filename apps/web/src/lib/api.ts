@@ -1,6 +1,17 @@
 const rawApiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
 export const API_URL = rawApiUrl.replace(/\/+$/, '');
 
+export function getTargetUrl(cleanPath: string): string {
+  if (typeof window !== 'undefined') {
+    const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+    const forceDirect = process.env.NEXT_PUBLIC_USE_DIRECT_API === 'true';
+    if (!forceDirect && !isLocalhost) {
+      return `/api-proxy${cleanPath}`;
+    }
+  }
+  return `${API_URL}${cleanPath}`;
+}
+
 export class ApiError extends Error {
   code: string;
   fieldErrors?: Record<string, string[]>;
@@ -13,7 +24,7 @@ export class ApiError extends Error {
 
 async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
   const cleanPath = path.startsWith('/') ? path : `/${path}`;
-  const fullUrl = `${API_URL}${cleanPath}`;
+  const fullUrl = getTargetUrl(cleanPath);
   try {
     const res = await fetch(fullUrl, {
       ...options,

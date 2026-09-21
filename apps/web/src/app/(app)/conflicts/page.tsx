@@ -159,7 +159,7 @@ export default function ConflictsPage() {
             {/* Side-by-Side Comparison Box Matching Mockup */}
             <div>
               <Label>Komparasi Kebutuhan / Rekaman Sumber</Label>
-              <div className="grid grid-cols-2 gap-2 rounded-xl border border-border bg-white p-3 text-xs">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 rounded-xl border border-border bg-white p-3 text-xs">
                 <div className="rounded-lg bg-surface p-2.5">
                   <div className="font-bold text-navy">Divisi Logistik</div>
                   <div className="mt-1 text-base font-bold text-teal">100 unit</div>

@@ -16,6 +16,14 @@ const nextConfig = {
   env: {
     NEXT_PUBLIC_API_URL: publicApiUrl.replace(/\/+$/, ''),
   },
+  async rewrites() {
+    return [
+      {
+        source: '/api-proxy/:path*',
+        destination: `${publicApiUrl.replace(/\/+$/, '')}/:path*`,
+      },
+    ];
+  },
 };
 
 module.exports = nextConfig;

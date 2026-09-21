@@ -74,25 +74,25 @@ export default function DashboardPage() {
   return (
     <div className="space-y-6">
       {/* Top Banner Matching PDF Reference */}
-      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-[#16324F] via-[#1c446c] to-[#087EA4] p-6 text-white shadow-lg">
+      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-[#16324F] via-[#1c446c] to-[#087EA4] p-4 sm:p-6 text-white shadow-lg">
         <div className="pointer-events-none absolute -right-10 -top-10 h-48 w-48 rounded-full bg-cyan/20 blur-2xl" />
         <div className="relative z-10 flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
           <div>
-            <h1 className="font-display text-2xl font-bold tracking-tight">
+            <h1 className="font-display text-xl sm:text-2xl font-bold tracking-tight">
               Hai, {me?.fullName || 'Sandhy'}.
             </h1>
-            <p className="mt-1 text-sm text-cyan/90">
+            <p className="mt-1 text-xs sm:text-sm text-cyan/90">
               Berikut ringkasan operasional Cakrawala hari ini.
             </p>
           </div>
           <div className="flex items-center gap-3">
-            <div className="flex items-center gap-3 rounded-xl border border-white/20 bg-white/10 px-4 py-2 backdrop-blur-sm">
-              <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-white/90 p-1 shadow-sm">
+            <div className="flex items-center gap-2.5 sm:gap-3 rounded-xl border border-white/20 bg-white/10 px-3 py-1.5 sm:px-4 sm:py-2 backdrop-blur-sm">
+              <div className="flex h-8 w-8 sm:h-9 sm:w-9 items-center justify-center rounded-lg bg-white/90 p-1 shadow-sm">
                 <img src="/logo.png" alt="SYNC Cakrawala Logo" className="h-full w-auto object-contain" />
               </div>
               <div className="text-right">
-                <div className="font-display text-sm font-bold tracking-wider text-white">SYNC</div>
-                <div className="text-[10px] uppercase tracking-widest text-cyan">Operational Control</div>
+                <div className="font-display text-xs sm:text-sm font-bold tracking-wider text-white">SYNC</div>
+                <div className="text-[9px] sm:text-[10px] uppercase tracking-widest text-cyan">Operational Control</div>
               </div>
             </div>
           </div>
@@ -100,43 +100,43 @@ export default function DashboardPage() {
       </div>
 
       {/* 4 Primary KPI Cards */}
-      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid grid-cols-2 gap-2.5 sm:gap-3 lg:grid-cols-4">
         <Link href="/programs">
-          <Card className="transition hover:border-teal hover:shadow-md">
-            <div className="text-xs font-semibold uppercase tracking-wider text-navy/50">Program Aktif</div>
-            <div className="mt-2 flex items-baseline gap-2">
-              <span className="font-display text-3xl font-bold text-navy">{kpis.activePrograms}</span>
-              <span className="text-xs text-navy/50">2 minggu ini</span>
+          <Card className="p-3.5 sm:p-4 transition hover:border-teal hover:shadow-md">
+            <div className="text-[11px] sm:text-xs font-semibold uppercase tracking-wider text-navy/50 truncate">Program Aktif</div>
+            <div className="mt-1.5 sm:mt-2 flex items-baseline gap-1.5 sm:gap-2">
+              <span className="font-display text-2xl sm:text-3xl font-bold text-navy">{kpis.activePrograms}</span>
+              <span className="text-[10px] sm:text-xs text-navy/50">2 mgg ini</span>
             </div>
           </Card>
         </Link>
 
         <Link href="/approvals">
-          <Card className="transition hover:border-teal hover:shadow-md">
-            <div className="text-xs font-semibold uppercase tracking-wider text-navy/50">Persetujuan</div>
-            <div className="mt-2 flex items-baseline gap-2">
-              <span className="font-display text-3xl font-bold text-navy">{kpis.pendingApprovals}</span>
-              <span className="text-xs text-amber-600 font-semibold">{kpis.pendingApprovals > 0 ? `${kpis.pendingApprovals} perlu tindakan` : 'semua selesai'}</span>
+          <Card className="p-3.5 sm:p-4 transition hover:border-teal hover:shadow-md">
+            <div className="text-[11px] sm:text-xs font-semibold uppercase tracking-wider text-navy/50 truncate">Persetujuan</div>
+            <div className="mt-1.5 sm:mt-2 flex items-baseline gap-1.5 sm:gap-2">
+              <span className="font-display text-2xl sm:text-3xl font-bold text-navy">{kpis.pendingApprovals}</span>
+              <span className="text-[10px] sm:text-xs text-amber-600 font-semibold truncate">{kpis.pendingApprovals > 0 ? `${kpis.pendingApprovals} perlu tindakan` : 'semua selesai'}</span>
             </div>
           </Card>
         </Link>
 
         <Link href="/conflicts">
-          <Card className="transition hover:border-teal hover:shadow-md">
-            <div className="text-xs font-semibold uppercase tracking-wider text-navy/50">Konflik</div>
-            <div className="mt-2 flex items-baseline gap-2">
-              <span className="font-display text-3xl font-bold text-navy">{kpis.openConflicts}</span>
-              <span className="text-xs text-danger font-semibold">{kpis.openConflicts > 0 ? `${kpis.openConflicts} perhatian` : 'tidak ada'}</span>
+          <Card className="p-3.5 sm:p-4 transition hover:border-teal hover:shadow-md">
+            <div className="text-[11px] sm:text-xs font-semibold uppercase tracking-wider text-navy/50 truncate">Konflik</div>
+            <div className="mt-1.5 sm:mt-2 flex items-baseline gap-1.5 sm:gap-2">
+              <span className="font-display text-2xl sm:text-3xl font-bold text-navy">{kpis.openConflicts}</span>
+              <span className="text-[10px] sm:text-xs text-danger font-semibold truncate">{kpis.openConflicts > 0 ? `${kpis.openConflicts} perhatian` : 'tidak ada'}</span>
             </div>
           </Card>
         </Link>
 
         <Link href="/tasks">
-          <Card className="transition hover:border-teal hover:shadow-md">
-            <div className="text-xs font-semibold uppercase tracking-wider text-navy/50">Terlambat</div>
-            <div className="mt-2 flex items-baseline gap-2">
-              <span className="font-display text-3xl font-bold text-danger">{kpis.overdueTasks}</span>
-              <span className="text-xs text-navy/50">tugas lewat tenggat</span>
+          <Card className="p-3.5 sm:p-4 transition hover:border-teal hover:shadow-md">
+            <div className="text-[11px] sm:text-xs font-semibold uppercase tracking-wider text-navy/50 truncate">Terlambat</div>
+            <div className="mt-1.5 sm:mt-2 flex items-baseline gap-1.5 sm:gap-2">
+              <span className="font-display text-2xl sm:text-3xl font-bold text-danger">{kpis.overdueTasks}</span>
+              <span className="text-[10px] sm:text-xs text-navy/50 truncate">tugas lewat</span>
             </div>
           </Card>
         </Link>
@@ -147,7 +147,7 @@ export default function DashboardPage() {
         {/* Left 2 Columns */}
         <div className="space-y-6 lg:col-span-2">
           {/* Program Operasional Card */}
-          <Card className="p-5">
+          <Card className="p-4 sm:p-5">
             <div className="mb-4 flex items-center justify-between border-b border-border pb-3">
               <div>
                 <h2 className="font-display text-base font-bold text-navy">Program Operasional</h2>
@@ -164,16 +164,16 @@ export default function DashboardPage() {
               ) : (
                 programs.map((p) => (
                   <div key={p.id} className="space-y-2">
-                    <div className="flex items-center justify-between text-sm">
-                      <div>
-                        <Link href={`/programs/${p.id}`} className="font-semibold text-navy hover:text-teal">
+                    <div className="flex items-start justify-between gap-2 text-sm">
+                      <div className="min-w-0 flex-1">
+                        <Link href={`/programs/${p.id}`} className="font-semibold text-navy hover:text-teal block truncate">
                           {p.name}
                         </Link>
                         <div className="text-[11px] text-navy/50">
                           {p.division} {p.endDate ? `• Deadline: ${new Date(p.endDate).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' })}` : ''}
                         </div>
                       </div>
-                      <span className="font-display text-xs font-bold text-navy">{p.progress}%</span>
+                      <span className="font-display text-xs font-bold text-navy flex-shrink-0">{p.progress}%</span>
                     </div>
                     {/* Visual Progress Bar */}
                     <div className="h-2 w-full overflow-hidden rounded-full bg-surface">

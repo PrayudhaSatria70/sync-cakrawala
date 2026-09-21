@@ -62,7 +62,12 @@ export default function LoginPage() {
       setMe(user);
       router.replace(user.mustChangePassword ? '/settings/security' : '/dashboard');
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : (err instanceof Error ? err.message : 'Login failed'));
+      const rawMsg = err instanceof ApiError ? err.message : (err instanceof Error ? err.message : 'Login failed');
+      if (rawMsg.toLowerCase().includes('authentication required') || rawMsg.toLowerCase().includes('unauthorized')) {
+        setError('Email atau password tidak sesuai. Pastikan kredensial benar.');
+      } else {
+        setError(rawMsg);
+      }
     } finally {
       setSubmitting(false);
     }
@@ -178,7 +183,7 @@ export default function LoginPage() {
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="muhammadsand.prayudha@cakrawala.ac.id"
                 required
-                className="w-full rounded-xl bg-[#E8F0FE] px-4 py-3 sm:py-3.5 text-sm sm:text-base text-[#0A2540] outline-none transition focus:ring-2 focus:ring-[#087EA4]/40"
+                className="w-full rounded-xl bg-[#E8F0FE] px-4 py-3 sm:py-3.5 text-base text-[#0A2540] outline-none transition focus:ring-2 focus:ring-[#087EA4]/40"
               />
             </div>
 
@@ -193,7 +198,7 @@ export default function LoginPage() {
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="••••••••••••"
                   required
-                  className="w-full rounded-xl bg-[#E8F0FE] px-4 py-3 sm:py-3.5 pr-12 text-sm sm:text-base text-[#0A2540] outline-none transition focus:ring-2 focus:ring-[#087EA4]/40"
+                  className="w-full rounded-xl bg-[#E8F0FE] px-4 py-3 sm:py-3.5 pr-12 text-base text-[#0A2540] outline-none transition focus:ring-2 focus:ring-[#087EA4]/40"
                 />
                 <button
                   type="button"

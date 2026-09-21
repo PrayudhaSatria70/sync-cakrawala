@@ -28,8 +28,8 @@ export default function AuditPage() {
           ))}
         </Select>
       </div>
-      <div className="overflow-hidden rounded-xl border border-border bg-white">
-        <table className="w-full text-left text-sm">
+      <div className="overflow-x-auto rounded-xl border border-border bg-white shadow-sm">
+        <table className="w-full min-w-[500px] text-left text-sm">
           <thead className="border-b border-border bg-surface text-xs uppercase text-navy/50">
             <tr>
               <th className="px-3 py-2">Time</th>
