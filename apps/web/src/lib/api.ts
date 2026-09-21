@@ -1,4 +1,5 @@
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
+const rawApiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
+export const API_URL = rawApiUrl.replace(/\/+$/, '');
 
 export class ApiError extends Error {
   code: string;
@@ -11,20 +12,28 @@ export class ApiError extends Error {
 }
 
 async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
-  const res = await fetch(`${API_URL}${path}`, {
-    ...options,
-    credentials: 'include',
-    headers: {
-      ...(options.body instanceof FormData ? {} : { 'Content-Type': 'application/json' }),
-      ...options.headers,
-    },
-  });
+  const cleanPath = path.startsWith('/') ? path : `/${path}`;
+  const fullUrl = `${API_URL}${cleanPath}`;
+  try {
+    const res = await fetch(fullUrl, {
+      ...options,
+      credentials: 'include',
+      headers: {
+        ...(options.body instanceof FormData ? {} : { 'Content-Type': 'application/json' }),
+        ...options.headers,
+      },
+    });
 
-  if (res.status === 204) return undefined as T;
+    if (res.status === 204) return undefined as T;
 
-  const data = await res.json().catch(() => ({}));
-  if (!res.ok) throw new ApiError(data);
-  return data as T;
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) throw new ApiError(data);
+    return data as T;
+  } catch (err) {
+    if (err instanceof ApiError) throw err;
+    const msg = err instanceof Error ? err.message : 'Network request failed';
+    throw new Error(`Tidak dapat terhubung ke backend (${fullUrl}): ${msg}`);
+  }
 }
 
 export const api = {

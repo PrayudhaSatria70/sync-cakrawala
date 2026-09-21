@@ -37,19 +37,24 @@ async function bootstrap() {
     origin: (origin, callback) => {
       if (
         !origin ||
+        rawWebOrigin === '*' ||
         allowedOrigins.has(origin) ||
         /^http:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(origin) ||
-        /^https:\/\/[a-zA-Z0-9_-]+\.vercel\.app$/.test(origin) ||
-        /^https:\/\/[a-zA-Z0-9_.-]*cakrawala\.ac\.id$/.test(origin)
+        origin.endsWith('.vercel.app') ||
+        origin.endsWith('.vercel.sh') ||
+        origin.endsWith('.railway.app') ||
+        origin.endsWith('.cakrawala.ac.id')
       ) {
         callback(null, true);
       } else {
+        console.warn(`[CORS] Rejected origin: ${origin}`);
         callback(null, false);
       }
     },
     credentials: true,
     methods: ['GET', 'HEAD', 'PUT', 'PATCH', 'POST', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Accept', 'Authorization', 'X-Request-ID'],
+    optionsSuccessStatus: 200,
   });
 
   const cookieSameSite = (config.get<string>('COOKIE_SAME_SITE') || (isProd ? 'none' : 'lax')) as
@@ -58,7 +63,7 @@ async function bootstrap() {
     | 'strict';
   const cookieSecure = config.get<string>('COOKIE_SECURE')
     ? config.get<string>('COOKIE_SECURE') === 'true'
-    : isProd;
+    : (isProd || cookieSameSite === 'none');
 
   app.use(cookieParser());
   app.use(
