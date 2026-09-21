@@ -17,7 +17,8 @@ import { CurrentUser } from '../common/decorators/current-user.decorator';
 import { AuditService } from '../audit/audit.service';
 
 class LoginDto {
-  @IsEmail()
+  @IsString()
+  @MinLength(1)
   email: string;
 
   @IsString()

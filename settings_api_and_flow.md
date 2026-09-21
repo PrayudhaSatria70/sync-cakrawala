@@ -67,12 +67,13 @@ All endpoints are hosted at `http://localhost:4000` (or `PORT`).
 ### 2.1 Authentication Endpoints (`/auth`)
 
 #### `POST /auth/login`
-- **Description**: Authenticate with email/password local credential.
+- **Description**: Authenticate with email or NIM/username local credentials.
 - **Headers**: `Content-Type: application/json`
 - **Request Body**:
   ```json
   { "email": "admin@cakrawala.ac.id", "password": "Demo123!" }
   ```
+  *(Note: The `email` field accepts either institutional email address or NIM / username, e.g., `"admin"`, `"prayudha"`, `"coordinator"`).*
 - **Response** (`200 OK`):
   ```json
   {
@@ -109,6 +110,22 @@ All endpoints are hosted at `http://localhost:4000` (or `PORT`).
     "enabled": false,
     "domain": "cakrawala.ac.id",
     "message": "Google OIDC is not configured. Use a local demo account."
+  }
+  ```
+
+#### `GET /health`
+- **Description**: Basic liveness and service health probe.
+- **Response** (`200 OK`): `{ "status": "ok", "service": "sync-api", "timestamp": "2026-09-21T09:35:02.684Z" }`
+
+#### `GET /`
+- **Description**: Root service indicator directing developers and evaluators to the web frontend application.
+- **Response** (`200 OK`):
+  ```json
+  {
+    "service": "SYNC Cakrawala Backend API",
+    "status": "online",
+    "webUrl": "http://localhost:3000",
+    "message": "This is the backend REST API. Open http://localhost:3000 to access the SYNC Cakrawala web interface."
   }
   ```
 

@@ -13,8 +13,22 @@ async function bootstrap() {
   const webOrigin = config.get<string>('WEB_ORIGIN', 'http://localhost:3000');
   const sessionSecret = config.get<string>('SESSION_SECRET', 'dev-secret');
 
+  const allowedOrigins = new Set([
+    webOrigin,
+    'http://localhost:3000',
+    'http://127.0.0.1:3000',
+    'http://localhost:3001',
+    'http://127.0.0.1:3001',
+  ]);
+
   app.enableCors({
-    origin: webOrigin,
+    origin: (origin, callback) => {
+      if (!origin || allowedOrigins.has(origin) || /^http:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(origin)) {
+        callback(null, true);
+      } else {
+        callback(null, false);
+      }
+    },
     credentials: true,
   });
 

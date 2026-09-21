@@ -17,7 +17,7 @@ export class AuthService {
     private config: ConfigService,
   ) {}
 
-  async loginLocal(email: string, password: string) {
+  async loginLocal(identifier: string, password: string) {
     const settings = await this.prisma.systemSettings.findUnique({
       where: { id: 'default' },
     });
@@ -28,8 +28,14 @@ export class AuthService {
       });
     }
 
-    const user = await this.prisma.user.findUnique({
-      where: { email: email.toLowerCase() },
+    const cleanIdentifier = identifier.trim().toLowerCase();
+    const user = await this.prisma.user.findFirst({
+      where: {
+        OR: [
+          { email: cleanIdentifier },
+          { username: cleanIdentifier },
+        ],
+      },
       include: { role: true, division: true },
     });
 

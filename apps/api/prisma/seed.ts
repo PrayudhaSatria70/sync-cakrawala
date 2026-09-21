@@ -156,6 +156,20 @@ async function main() {
     },
   });
 
+  await prisma.user.create({
+    data: {
+      fullName: 'Muhammad Sand Prayudha',
+      email: 'muhammadsand.prayudha@cakrawala.ac.id',
+      username: 'prayudha',
+      roleId: roles.SUPER_ADMIN,
+      divisionId: divisions.OPERATIONS,
+      status: 'ACTIVE',
+      authProvider: 'LOCAL',
+      passwordHash: hash,
+      mustChangePassword: false,
+    },
+  });
+
   const coordinator = await prisma.user.create({
     data: {
       fullName: 'Rina Coordinator',

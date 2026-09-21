@@ -1,9 +1,19 @@
 import { Controller, Get } from '@nestjs/common';
 
-@Controller('health')
+@Controller()
 export class HealthController {
-  @Get()
+  @Get('health')
   check() {
     return { status: 'ok', service: 'sync-api', timestamp: new Date().toISOString() };
+  }
+
+  @Get()
+  root() {
+    return {
+      service: 'SYNC Cakrawala Backend API',
+      status: 'online',
+      webUrl: 'http://localhost:3000',
+      message: 'This is the backend REST API. Open http://localhost:3000 to access the SYNC Cakrawala web interface.',
+    };
   }
 }
