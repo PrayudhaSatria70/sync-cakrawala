@@ -59,7 +59,7 @@ async function bootstrap() {
   app.useGlobalFilters(new HttpExceptionFilter());
 
   const port = config.get<number>('PORT', 4000);
-  await app.listen(port);
+  await app.listen(port, '0.0.0.0');
   console.log(`SYNC API listening on http://localhost:${port}`);
 }
 

@@ -12,6 +12,11 @@
     "dev:api": "npm run dev -w @sync/api",
     "dev:web": "npm run dev -w @sync/web",
     "build": "npm run build -w @sync/shared && npm run build -w @sync/api && npm run build -w @sync/web",
+    "build:api": "npm run build -w @sync/shared && npm run build -w @sync/api",
+    "build:web": "npm run build -w @sync/shared && npm run build -w @sync/web",
+    "start": "npm run start:api",
+    "start:api": "npm run start -w @sync/api",
+    "start:web": "npm run start -w @sync/web",
     "db:generate": "npm run prisma:generate -w @sync/api",
     "db:migrate": "npm run prisma:migrate -w @sync/api",
     "db:seed": "npm run prisma:seed -w @sync/api",
@@ -19,6 +24,7 @@
     "lint": "npm run lint -w @sync/api --if-present && npm run lint -w @sync/web --if-present",
     "test": "npm run test -w @sync/api"
   },
+  "packageManager": "npm@11.19.0",
   "devDependencies": {
     "concurrently": "^9.1.2",
     "typescript": "^5.8.2"

@@ -293,3 +293,40 @@ All endpoints are hosted at `http://localhost:4000` (or `PORT`).
    - Storage keys decoupled from user-supplied file names to prevent directory traversal.
 4. **Auditability**:
    - Every state transition across users, roles, divisions, documents, reviews, tasks, approvals, and conflicts generates an immutable `AuditLog` row.
+
+---
+
+## 6. Deployment & Cloud Hosting (Railway / Railpack)
+
+### 6.1 Architecture Overview
+The repository is an npm workspaces monorepo containing:
+- `@sync/api`: NestJS Backend API (default port `4000`, binds `0.0.0.0`)
+- `@sync/web`: Next.js Web App Router (default port `3000`, binds dynamic `$PORT`)
+- `@sync/shared`: Shared TypeScript contracts and utilities
+
+### 6.2 Railway Deployment Options
+
+#### Option A: Separate Services (Recommended for Production)
+In your Railway project, deploy two services from the same Git repository:
+
+1. **API Service (`sync-api`)**:
+   - **Build Command**: `npm run build:api` (or `npm run build -w @sync/shared && npm run build -w @sync/api`)
+   - **Start Command**: `npm run start:api`
+   - **Variables**:
+     - `PORT` (assigned automatically by Railway)
+     - `DATABASE_URL="file:./dev.db"`
+     - `SESSION_SECRET="production-random-secret"`
+     - `WEB_ORIGIN="https://<your-web-service>.up.railway.app"`
+
+2. **Web Service (`sync-web`)**:
+   - **Build Command**: `npm run build:web` (or `npm run build -w @sync/shared && npm run build -w @sync/web`)
+   - **Start Command**: `npm run start:web`
+   - **Variables**:
+     - `PORT` (assigned automatically by Railway)
+     - `NEXT_PUBLIC_API_URL="https://<your-api-service>.up.railway.app"`
+
+#### Option B: Single Service (Default Railpack Detection)
+If deployed as a single root service on Railway, Railpack automatically detects the root scripts:
+- **Build Command**: `npm run build`
+- **Start Command**: `npm start` (defaults to `npm run start:api`)
+- Package manager is explicitly pinned via `"packageManager": "npm@11.19.0"`.
