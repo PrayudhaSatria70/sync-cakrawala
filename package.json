@@ -1,0 +1,34 @@
+{
+  "name": "sync-cakrawala",
+  "version": "1.0.0",
+  "private": true,
+  "description": "SYNC Cakrawala — multi-division operational coordination platform",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "concurrently -n api,web -c blue,green \"npm run dev -w @sync/api\" \"npm run dev -w @sync/web\"",
+    "dev:api": "npm run dev -w @sync/api",
+    "dev:web": "npm run dev -w @sync/web",
+    "build": "npm run build -w @sync/api && npm run build -w @sync/web",
+    "db:generate": "npm run prisma:generate -w @sync/api",
+    "db:migrate": "npm run prisma:migrate -w @sync/api",
+    "db:seed": "npm run prisma:seed -w @sync/api",
+    "db:reset": "npm run prisma:reset -w @sync/api",
+    "lint": "npm run lint -w @sync/api --if-present && npm run lint -w @sync/web --if-present",
+    "test": "npm run test -w @sync/api"
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.2",
+    "typescript": "^5.8.2"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "allowScripts": {
+    "@prisma/client@6.19.3": true,
+    "prisma@6.19.3": true,
+    "@prisma/engines@6.19.3": true
+  }
+}
