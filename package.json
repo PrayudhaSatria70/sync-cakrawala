@@ -11,7 +11,7 @@
     "dev": "concurrently -n api,web -c blue,green \"npm run dev -w @sync/api\" \"npm run dev -w @sync/web\"",
     "dev:api": "npm run dev -w @sync/api",
     "dev:web": "npm run dev -w @sync/web",
-    "build": "npm run build -w @sync/api && npm run build -w @sync/web",
+    "build": "npm run build -w @sync/shared && npm run build -w @sync/api && npm run build -w @sync/web",
     "db:generate": "npm run prisma:generate -w @sync/api",
     "db:migrate": "npm run prisma:migrate -w @sync/api",
     "db:seed": "npm run prisma:seed -w @sync/api",
@@ -30,5 +30,8 @@
     "@prisma/client@6.19.3": true,
     "prisma@6.19.3": true,
     "@prisma/engines@6.19.3": true
+  },
+  "dependencies": {
+    "caniuse-lite": "^1.0.30001810"
   }
 }

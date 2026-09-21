@@ -15,6 +15,7 @@ coverage
 *.tsbuildinfo
 .vscode
 .idea
-uploads
-storage
+/uploads
+/storage
+!apps/api/src/storage/
 *.sqlite
